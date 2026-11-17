@@ -12,8 +12,6 @@ single ISO, and served to the cluster from a local bastion host.
 
 ## Architecture
 
-![Architecture](docs/images/architecture.svg)
-
 The cluster has two zones separated by an air gap:
 
 - **Connected zone:** a workstation downloads and verifies everything the cluster needs and packs it into a bundle ISO.
@@ -97,7 +95,7 @@ All external traffic still fails instantly.
 | 4 | 3-replica nginx from the local registry, NodePort answering on every node | Pass |
 | 5 | Cold restart of the control plane and a worker, recovered with no image re-fetch | Pass |
 
-The full report with commands and evidence is in [`docs/acceptance-test-report.pdf`](docs/acceptance-test-report.pdf) *(to be added)*.
+The full report with commands and evidence will be added to this repository.
 
 ## Environment
 
@@ -135,8 +133,7 @@ The full report with commands and evidence is in [`docs/acceptance-test-report.p
 │   ├── calico.yaml                  CNI manifest pointed at the local registry
 │   ├── tests/                       Acceptance test workload, Pod Security test
 │   ├── demo/                        Air-gap proof app, NetworkPolicies, RBAC
-│   └── security/                    Pod Security labels, Secrets encryption template
-└── docs/                            Architecture diagram, acceptance test report
+    └── security/                    Pod Security labels, Secrets encryption template
 ```
 
 ## Usage
