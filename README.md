@@ -97,16 +97,16 @@ All external traffic still fails instantly.
 | 4 | 3-replica nginx from the local registry, NodePort answering on every node | Pass |
 | 5 | Cold restart of the control plane and a worker, recovered with no image re-fetch | Pass |
 
-The full report with commands and evidence will be added to this repository.
+The full report with commands and screenshot evidence is in [`acceptance-test-report.pdf`](acceptance-test-report.pdf).
 
 ## Environment
 
 | Host | Role | IP | vCPU / RAM |
 | --- | --- | --- | --- |
-| bastion-mirror | Jump host, registry, repository, DNS, NTP, CA | 192.168.50.10 | 2 / 4 GB |
+| bastion-mirror | Jump host, registry, repository, DNS, NTP, CA | 192.168.50.10 | 2 / 2 GB |
 | k8s-cp-01 | Control plane | 192.168.50.11 | 2 / 4 GB |
-| k8s-worker-01 | Worker | 192.168.50.12 | 2 / 4 GB |
-| k8s-worker-02 | Worker | 192.168.50.13 | 2 / 4 GB |
+| k8s-worker-01 | Worker | 192.168.50.12 | 2 / 3 GB |
+| k8s-worker-02 | Worker | 192.168.50.13 | 2 / 3 GB |
 
 | Component | Version |
 | --- | --- |
@@ -120,6 +120,10 @@ The full report with commands and evidence will be added to this repository.
 
 ```
 .
+├── README.md                        This overview
+├── RUNBOOK.md                       Step-by-step build, validation, mirror updates, troubleshooting
+├── acceptance-test-report.pdf       Acceptance test results with evidence
+├── architecture.svg                 Architecture diagram
 ├── workstation/
 │   └── download-artifacts.sh        Harvest everything and build the ISO
 ├── bastion/
@@ -140,13 +144,14 @@ The full report with commands and evidence will be added to this repository.
 
 ## Usage
 
+The complete build procedure, from the Proxmox network to the hardened cluster, is in [`RUNBOOK.md`](RUNBOOK.md).
+In short:
+
 ```bash
-# Connected workstation: build the bundle
+# Connected workstation: build the bundle ISO
 ./workstation/download-artifacts.sh
 
-# Bastion: after mounting the ISO and starting the services
-./bastion/scripts/load-images.sh
-./bastion/scripts/add-mirror-aliases.sh
+# Bastion: after mounting the ISO and setting up the services (RUNBOOK section 6)
 cd ansible && ansible-playbook site.yml
 
 # Control plane

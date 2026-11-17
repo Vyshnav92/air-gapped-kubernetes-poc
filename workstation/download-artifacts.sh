@@ -9,7 +9,7 @@
 #   2. images     container images saved as tarballs (skopeo)
 #   3. binaries   CNI plugins, crictl, Helm, CNCF Distribution registry (+ checksum check)
 #   4. manifests  Calico, metrics-server, Traefik Helm chart
-#   5. package    BOM + SHA256SUMS + tarball + ISO
+#   5. package    repo configs + BOM + SHA256SUMS + tarball + ISO
 #
 # Usage:
 #   ./download-artifacts.sh            # run every step
@@ -224,6 +224,16 @@ step_package() {
   log "Step 5/5: BOM, checksums, tarball, ISO"
   [[ -d "$BUNDLE/debs" && -d "$BUNDLE/images" ]] || die "bundle is incomplete, run all steps first"
 
+  # Ship this repository's configs (Ansible, bastion configs, manifests) inside the bundle,
+  # so they cross the air gap on the same ISO. They land in /srv/airgap/bundle/config.
+  local repo
+  repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  if [[ -d "$repo/ansible" && -d "$repo/kubernetes" ]]; then
+    rm -rf "$BUNDLE/config" && mkdir -p "$BUNDLE/config"
+    cp -r "$repo/ansible" "$repo/bastion" "$repo/kubernetes" "$BUNDLE/config/"
+    ok "repository configs copied to bundle/config"
+  fi
+
   {
     echo "Air-Gapped K8s PoC bundle ${NAME}"
     echo "Built: $(date -u +%Y-%m-%dT%H:%M:%SZ) on $(hostname)"
@@ -250,6 +260,9 @@ step_package() {
     echo
     echo "== Manifests =="
     ls "$BUNDLE/manifests"
+    echo
+    echo "== Configs =="
+    ls "$BUNDLE/config"
   } > "$BUNDLE/BOM.txt"
   ok "BOM.txt"
 
