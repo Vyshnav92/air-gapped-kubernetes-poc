@@ -128,11 +128,11 @@ The full report with commands and evidence will be added to this repository.
 │   ├── pki/                         Root CA and registry certificate steps (no keys)
 │   └── scripts/                     Load images into the registry, add mirror aliases
 ├── ansible/                         Node preparation (site.yml runs everything)
-├── kubernetes/
-│   ├── kubeadm-config.yaml          Cluster definition
-│   ├── calico.yaml                  CNI manifest pointed at the local registry
-│   ├── tests/                       Acceptance test workload, Pod Security test
-│   ├── demo/                        Air-gap proof app, NetworkPolicies, RBAC
+└── kubernetes/
+    ├── kubeadm-config.yaml          Cluster definition
+    ├── calico.yaml                  CNI manifest pointed at the local registry
+    ├── tests/                       Acceptance test workload, Pod Security test
+    ├── demo/                        Air-gap proof app, NetworkPolicies, RBAC
     └── security/                    Pod Security labels, Secrets encryption template
 ```
 
