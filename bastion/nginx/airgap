@@ -1,0 +1,7 @@
+# /etc/nginx/sites-available/airgap on bastion-mirror (linked into sites-enabled)
+# Only these two folders are served. /srv/airgap/pki (CA key) is NOT reachable.
+server {
+    listen 80 default_server;
+    location /repo/  { alias /srv/airgap/repo/;  autoindex on; }
+    location /files/ { alias /srv/airgap/files/; autoindex on; }
+}

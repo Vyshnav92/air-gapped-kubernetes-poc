@@ -1,0 +1,69 @@
+- name: Configure containerd for Kubernetes
+  hosts: k8s
+  become: true
+  tasks:
+
+    # CRI on, systemd cgroups (matches kubelet), pause image from the bastion,
+    # and mirror rules read from /etc/containerd/certs.d
+    - name: containerd settings for Kubernetes
+      ansible.builtin.copy:
+        dest: /etc/containerd/config.toml
+        content: |
+          version = 2
+
+          [plugins."io.containerd.grpc.v1.cri"]
+            sandbox_image = "bastion-mirror:5000/k8s/pause:3.9"
+
+            [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+              runtime_type = "io.containerd.runc.v2"
+
+              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+                SystemdCgroup = true
+
+            [plugins."io.containerd.grpc.v1.cri".registry]
+              config_path = "/etc/containerd/certs.d"
+      notify: restart containerd
+
+    - name: Make a folder per registry
+      ansible.builtin.file:
+        path: "/etc/containerd/certs.d/{{ item }}"
+        state: directory
+      loop: [docker.io, quay.io, registry.k8s.io, "bastion-mirror:5000"]
+
+    - name: Our CA in containerd's cert folder
+      ansible.builtin.copy:
+        src: /srv/airgap/pki/ca.crt
+        dest: "/etc/containerd/certs.d/bastion-mirror:5000/ca.crt"
+
+    # 'server' (the fallback) also points at the bastion, so even a failed
+    # pull never tries the internet
+    - name: Redirect docker.io and quay.io to the bastion
+      ansible.builtin.copy:
+        dest: "/etc/containerd/certs.d/{{ item }}/hosts.toml"
+        content: |
+          server = "https://bastion-mirror:5000"
+
+          [host."https://bastion-mirror:5000"]
+            capabilities = ["pull", "resolve"]
+      loop: [docker.io, quay.io]
+
+    - name: Redirect registry.k8s.io to the bastion (k8s/ folder)
+      ansible.builtin.copy:
+        dest: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+        content: |
+          server = "https://bastion-mirror:5000"
+
+          [host."https://bastion-mirror:5000/v2/k8s"]
+            capabilities = ["pull", "resolve"]
+            override_path = true
+
+    - name: Tell crictl where containerd is
+      ansible.builtin.copy:
+        dest: /etc/crictl.yaml
+        content: "runtime-endpoint: unix:///run/containerd/containerd.sock\n"
+
+  handlers:
+    - name: restart containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: restarted

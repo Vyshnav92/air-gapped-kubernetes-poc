@@ -1,0 +1,10 @@
+# CNCF Distribution v3 — /etc/distribution/config.yml on bastion-mirror
+version: 0.1
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+http:
+  addr: :5000
+  tls:
+    certificate: /srv/airgap/pki/registry.crt
+    key: /srv/airgap/pki/registry.key

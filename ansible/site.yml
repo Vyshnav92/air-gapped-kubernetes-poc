@@ -1,0 +1,4 @@
+# Full node build, in order. Run from the bastion: ansible-playbook site.yml
+- import_playbook: node-prep.yml
+- import_playbook: node-network.yml
+- import_playbook: containerd.yml
