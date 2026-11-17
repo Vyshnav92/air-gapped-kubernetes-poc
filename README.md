@@ -12,6 +12,8 @@ single ISO, and served to the cluster from a local bastion host.
 
 ## Architecture
 
+![Architecture](architecture.svg)
+
 The cluster has two zones separated by an air gap:
 
 - **Connected zone:** a workstation downloads and verifies everything the cluster needs and packs it into a bundle ISO.
